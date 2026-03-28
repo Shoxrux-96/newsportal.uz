@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}XabarUz{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0d0d0d;
+            --paper: #f5f0e8;
+            --accent: #c8392b;
+            --accent2: #1a3a5c;
+            --muted: #6b6560;
+            --border: #d4cfc7;
+            --white: #ffffff;
+            --card-bg: #fdfaf5;
+            --nav-h: 64px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+        /* NAV */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            height: var(--nav-h);
+            background: var(--ink);
+            display: flex; align-items: center;
+            padding: 0 2rem;
+            gap: 2rem;
+            border-bottom: 3px solid var(--accent);
+        }
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem; font-weight: 900;
+            color: var(--white); text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        .nav-logo span { color: var(--accent); }
+        .nav-links { display: flex; gap: 0.25rem; margin-left: auto; align-items: center; }
+        .nav-links a {
+            color: #ccc; text-decoration: none;
+            padding: 0.4rem 1rem; border-radius: 2px;
+            font-size: 0.85rem; font-weight: 500;
+            letter-spacing: 0.5px; text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+        .nav-links a.active { color: var(--white); }
+        .btn-nav-login {
+            background: var(--accent) !important;
+            color: var(--white) !important;
+            padding: 0.4rem 1.2rem !important;
+        }
+        .btn-nav-login:hover { background: #a52e22 !important; }
+        .nav-user { color: #aaa; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+        .nav-user strong { color: var(--white); }
+
+        /* TICKER */
+        .ticker {
+            background: var(--accent);
+            padding: 0.35rem 0;
+            overflow: hidden;
+        }
+        .ticker-inner {
+            display: flex; gap: 3rem;
+            animation: ticker 30s linear infinite;
+            white-space: nowrap;
+        }
+        .ticker span {
+            color: var(--white); font-size: 0.78rem;
+            font-weight: 500; letter-spacing: 0.3px;
+        }
+        @keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+
+        /* MAIN */
+        main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* CARDS */
+        .news-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; flex-direction: column;
+        }
+        .news-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        .news-card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-body { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+        .card-category {
+            display: inline-block;
+            background: var(--accent); color: var(--white);
+            font-size: 0.65rem; font-weight: 600;
+            padding: 0.2rem 0.6rem; letter-spacing: 1px;
+            text-transform: uppercase; border-radius: 2px;
+            text-decoration: none; width: fit-content;
+        }
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem; font-weight: 700;
+            line-height: 1.4; color: var(--ink);
+            text-decoration: none;
+        }
+        .card-title:hover { color: var(--accent); }
+        .card-summary { font-size: 0.85rem; color: var(--muted); line-height: 1.6; flex: 1; }
+        .card-meta { font-size: 0.75rem; color: var(--muted); display: flex; gap: 1rem; margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+        .card-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+        /* SECTION HEADER */
+        .section-header {
+            display: flex; align-items: baseline; gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--ink);
+        }
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem; font-weight: 900;
+        }
+        .section-header .see-all {
+            margin-left: auto; color: var(--accent);
+            font-size: 0.8rem; text-decoration: none; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        @media(max-width:768px) { .grid-3 { grid-template-columns: 1fr; } }
+
+        /* FOOTER */
+        footer {
+            margin-top: 4rem;
+            background: var(--ink); color: var(--muted);
+            padding: 2rem; text-align: center;
+            font-size: 0.8rem;
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+
+        /* BADGE */
+        .badge {
+            display: inline-block; padding: 0.2rem 0.6rem;
+            border-radius: 2px; font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge-pending { background: #fef3cd; color: #856404; }
+        .badge-approved { background: #d1e7dd; color: #0f5132; }
+        .badge-rejected { background: #f8d7da; color: #842029; }
+        .badge-admin { background: var(--accent); color: white; }
+        .badge-user { background: var(--accent2); color: white; }
+
+        /* ALERTS */
+        .alert { padding: 0.85rem 1.25rem; border-radius: 3px; margin-bottom: 1rem; font-size: 0.88rem; }
+        .alert-error { background: #f8d7da; color: #842029; border-left: 4px solid #842029; }
+        .alert-success { background: #d1e7dd; color: #0f5132; border-left: 4px solid #0f5132; }
+
+        /* BTNS */
+        .btn {
+            display: inline-block; padding: 0.6rem 1.4rem;
+            border-radius: 2px; font-size: 0.85rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            cursor: pointer; text-decoration: none;
+            border: none; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: #a52e22; }
+        .btn-secondary { background: var(--accent2); color: white; }
+        .btn-secondary:hover { background: #122a43; }
+        .btn-outline { background: transparent; color: var(--ink); border: 2px solid var(--ink); }
+        .btn-outline:hover { background: var(--ink); color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #bb2d3b; }
+        .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.75rem; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-logo">Xabar<span>Uz</span></a>
+        <div class="nav-links">
+            <a href="/" class="{{ 'active' if request.url.path == '/' }}">Bosh sahifa</a>
+            <a href="/news" class="{{ 'active' if '/news' in request.url.path }}">Yangiliklar</a>
+            {% if current_user %}
+                {% if current_user.role == 'admin' %}
+                    <a href="/admin" class="{{ 'active' if '/admin' in request.url.path }}">Admin Panel</a>
+                {% endif %}
+                <span class="nav-user">| <strong>{{ current_user.full_name }}</strong></span>
+                <a href="/logout" class="btn-nav-login">Chiqish</a>
+            {% else %}
+                <a href="/login" class="btn-nav-login">Kirish</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="ticker">
+        <div class="ticker-inner">
+            <span>🔴 SO'NGI YANGILIKLAR</span>
+            <span>Texnologiya olamidagi eng so'nggi voqealar</span>
+            <span>•</span>
+            <span>Sport yangiliklari kundalik yangilanib turadi</span>
+            <span>•</span>
+            <span>Iqtisodiyot va moliya xabarlari</span>
+            <span>•</span>
+            <span>Dunyo bo'ylab eng so'nggi voqealar</span>
+            <span>•</span>
+        </div>
+    </div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>© 2024 <a href="/">XabarUz</a> — Barcha huquqlar himoyalangan</p>
+        <p style="margin-top:0.5rem;">Toshkent, O'zbekiston</p>
+    </footer>
+</body>
+</html>

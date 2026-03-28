@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Yangiliklar — XabarUz{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-header {
+    background: var(--ink); color: white;
+    padding: 2.5rem 2rem; margin: -2rem -1.5rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem; font-weight: 900;
+}
+.page-header p { color: #888; margin-top: 0.3rem; font-size: 0.9rem; }
+
+.filter-bar {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 2rem;
+    padding: 1rem 1.2rem;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 3px;
+}
+.filter-btn {
+    padding: 0.4rem 1rem; border-radius: 2px;
+    text-decoration: none; font-size: 0.8rem; font-weight: 500;
+    border: 1px solid var(--border);
+    color: var(--muted); background: white;
+    transition: all 0.2s;
+}
+.filter-btn:hover, .filter-btn.active {
+    background: var(--ink); color: white; border-color: var(--ink);
+}
+.pagination {
+    display: flex; justify-content: center; gap: 0.5rem;
+    margin-top: 3rem;
+}
+.page-btn {
+    padding: 0.5rem 1rem; border-radius: 2px;
+    text-decoration: none; font-size: 0.85rem;
+    border: 1px solid var(--border); color: var(--ink);
+    background: white; transition: all 0.2s;
+}
+.page-btn:hover, .page-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>📰 Yangiliklar</h1>
+        <p>Eng so'nggi xabarlar va tahlillar</p>
+    </div>
+    <a href="/" style="color:#888; text-decoration:none; font-size:0.85rem;">← Bosh sahifa</a>
+</div>
+
+<div class="filter-bar">
+    <span style="font-weight:600; font-size:0.8rem; color:var(--muted); margin-right:0.5rem;">Filtr:</span>
+    <a href="/news" class="filter-btn {{ 'active' if not category }}">Barchasi</a>
+    {% for cat in categories %}
+    <a href="/news?category={{ cat }}" class="filter-btn {{ 'active' if category == cat }}">{{ cat }}</a>
+    {% endfor %}
+</div>
+
+{% if news_items %}
+<div class="grid-3">
+    {% for news, author in news_items %}
+    <div class="news-card">
+        <img src="{{ news.image_url }}" alt="{{ news.title }}" onerror="this.src='https://picsum.photos/400/250?random={{ loop.index + 20 }}'">
+        <div class="card-body">
+            <a href="/news?category={{ news.category }}" class="card-category">{{ news.category }}</a>
+            <a href="/news/{{ news.slug }}" class="card-title">{{ news.title }}</a>
+            <p class="card-summary">{{ news.summary[:130] if news.summary else '' }}{% if news.summary and news.summary|length > 130 %}...{% endif %}</p>
+            <div class="card-meta">
+                <span>✍️ {{ author.full_name }}</span>
+                <span>👁 {{ news.views }}</span>
+                <span>📅 {{ news.created_at.strftime('%d.%m.%Y') }}</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="/news?page={{ page - 1 }}{% if category %}&category={{ category }}{% endif %}" class="page-btn">← Oldingi</a>
+    {% endif %}
+    {% for p in range(1, total_pages + 1) %}
+    <a href="/news?page={{ p }}{% if category %}&category={{ category }}{% endif %}" class="page-btn {{ 'active' if p == page }}">{{ p }}</a>
+    {% endfor %}
+    {% if page < total_pages %}
+    <a href="/news?page={{ page + 1 }}{% if category %}&category={{ category }}{% endif %}" class="page-btn">Keyingi →</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div style="text-align:center; padding:4rem; color:var(--muted);">
+    <div style="font-size:3rem; margin-bottom:1rem;">🔍</div>
+    <p>Bu kategoriyada yangiliklar yo'q</p>
+    <a href="/news" class="btn btn-outline" style="margin-top:1rem; display:inline-block;">Barchasini ko'rish</a>
+</div>
+{% endif %}
+{% endblock %}

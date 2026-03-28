@@ -1,0 +1,110 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ 'Tahrirlash' if news else 'Yangi Yangilik' }} — Admin{% endblock %}
+{% block page_title %}{{ 'Yangilikni Tahrirlash' if news else 'Yangi Yangilik Qo\'shish' }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.image-preview { width: 100%; max-height: 200px; object-fit: cover; border-radius: 3px; margin-top: 0.5rem; border: 1px solid var(--border); display: none; }
+.char-count { font-size: 0.72rem; color: var(--muted); text-align: right; margin-top: 0.25rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
+    <a href="/admin/news" class="btn btn-outline btn-sm">← Orqaga</a>
+</div>
+
+<div class="admin-form">
+    <form method="POST" action="{{ '/admin/news/' + news.id|string + '/edit' if news else '/admin/news/create' }}">
+        <div class="form-row">
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Yangilik sarlavhasi *</label>
+                <input type="text" name="title" value="{{ news.title if news else '' }}" placeholder="Qiziqarli sarlavha kiriting..." required maxlength="200" id="titleInput">
+                <div class="char-count"><span id="titleCount">0</span>/200</div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Kategoriya *</label>
+                <select name="category" required>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {{ 'selected' if news and news.category == cat }}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Rasm URL (ixtiyoriy)</label>
+                <input type="url" name="image_url" value="{{ news.image_url if news else '' }}" placeholder="https://example.com/image.jpg" id="imageUrlInput">
+            </div>
+        </div>
+
+        {% if news and news.image_url %}
+        <img src="{{ news.image_url }}" alt="Rasm ko'rinishi" class="image-preview" id="imgPreview" style="display:block;">
+        {% else %}
+        <img src="" alt="Rasm ko'rinishi" class="image-preview" id="imgPreview">
+        {% endif %}
+
+        <div class="form-group">
+            <label>Qisqacha tavsif (xulosa)</label>
+            <input type="text" name="summary" value="{{ news.summary if news else '' }}" placeholder="Yangilik haqida qisqacha..." maxlength="500" id="summaryInput">
+            <div class="char-count"><span id="summaryCount">0</span>/500</div>
+        </div>
+
+        <div class="form-group">
+            <label>To'liq matn *</label>
+            <textarea name="content" rows="14" required placeholder="Yangilik to'liq matni...&#10;&#10;Har bir paragrafni yangi qatorda yozing.&#10;&#10;Qo'shimcha ma'lumotlar...">{{ news.content if news else '' }}</textarea>
+        </div>
+
+        {% if error %}
+        <div style="padding:0.75rem; background:#f8d7da; color:#842029; border-radius:3px; margin-bottom:1rem; font-size:0.85rem;">⚠️ {{ error }}</div>
+        {% endif %}
+
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary">
+                {{ '💾 Saqlash' if news else '🚀 Chop Etish' }}
+            </button>
+            <a href="/admin/news" class="btn btn-outline">Bekor Qilish</a>
+            {% if news %}
+            <a href="/news/{{ news.slug }}" target="_blank" class="btn btn-secondary btn-sm" style="margin-left:auto;">👁 Ko'rish</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<script>
+// Char counts
+function updateCount(inputId, countId) {
+    const input = document.getElementById(inputId);
+    const count = document.getElementById(countId);
+    if (input && count) {
+        count.textContent = input.value.length;
+        input.addEventListener('input', () => count.textContent = input.value.length);
+    }
+}
+updateCount('titleInput', 'titleCount');
+updateCount('summaryInput', 'summaryCount');
+
+// Image preview
+const imgUrl = document.getElementById('imageUrlInput');
+const imgPreview = document.getElementById('imgPreview');
+if (imgUrl) {
+    imgUrl.addEventListener('input', function() {
+        if (this.value) {
+            imgPreview.src = this.value;
+            imgPreview.style.display = 'block';
+            imgPreview.onerror = () => imgPreview.style.display = 'none';
+        } else {
+            imgPreview.style.display = 'none';
+        }
+    });
+}
+
+// Init counts
+document.querySelectorAll('input[maxlength]').forEach(el => {
+    const countEl = el.nextElementSibling?.querySelector('span');
+    if (countEl) countEl.textContent = el.value.length;
+});
+</script>
+{% endblock %}

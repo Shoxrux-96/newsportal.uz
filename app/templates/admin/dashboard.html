@@ -1,0 +1,119 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard — Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- STATS -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fff0ee;">📰</div>
+        <div>
+            <div class="stat-num">{{ news_count }}</div>
+            <div class="stat-label">Jami Yangiliklar</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eef0ff;">👥</div>
+        <div>
+            <div class="stat-num">{{ user_count }}</div>
+            <div class="stat-label">Foydalanuvchilar</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fff8e1;">⏳</div>
+        <div>
+            <div class="stat-num" style="color: {% if pending_count > 0 %}#856404{% else %}inherit{% endif %}">{{ pending_count }}</div>
+            <div class="stat-label">Kutayotganlar</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#e8f5e9;">✅</div>
+        <div>
+            <div class="stat-num">{{ user_count - pending_count }}</div>
+            <div class="stat-label">Tasdiqlangan</div>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:1.5rem;">
+    <!-- RECENT NEWS -->
+    <div class="admin-table-wrap">
+        <div class="admin-table-header">
+            <h3>So'nggi Yangiliklar</h3>
+            <a href="/admin/news" class="btn btn-outline btn-sm">Barchasi</a>
+        </div>
+        {% if recent_news %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Sarlavha</th>
+                    <th>Kategoriya</th>
+                    <th>Ko'rishlar</th>
+                    <th>Amal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for news in recent_news %}
+                <tr>
+                    <td>
+                        <a href="/news/{{ news.slug }}" style="color:inherit; text-decoration:none; font-weight:500;" target="_blank">
+                            {{ news.title[:45] }}{% if news.title|length > 45 %}...{% endif %}
+                        </a>
+                    </td>
+                    <td><span class="badge badge-user">{{ news.category }}</span></td>
+                    <td>{{ news.views }}</td>
+                    <td>
+                        <a href="/admin/news/{{ news.id }}/edit" class="btn btn-outline btn-sm">✏️</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="padding:2rem; text-align:center; color:var(--muted);">
+            Yangiliklar yo'q. <a href="/admin/news/create">Birinchisini qo'shing</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- PENDING USERS -->
+    <div class="admin-table-wrap">
+        <div class="admin-table-header">
+            <h3>
+                Kutayotganlar
+                {% if pending_count > 0 %}
+                <span style="background:var(--accent); color:white; font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:10px; margin-left:0.5rem;">{{ pending_count }}</span>
+                {% endif %}
+            </h3>
+            <a href="/admin/users" class="btn btn-outline btn-sm">Barchasi</a>
+        </div>
+        {% if pending_users %}
+        <table>
+            <thead>
+                <tr><th>Ism</th><th>Amal</th></tr>
+            </thead>
+            <tbody>
+                {% for u in pending_users %}
+                <tr>
+                    <td>
+                        <div style="font-weight:500; font-size:0.85rem;">{{ u.full_name }}</div>
+                        <div style="font-size:0.72rem; color:var(--muted);">{{ u.email }}</div>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                            <a href="/admin/users/{{ u.id }}/approve" class="btn btn-success btn-sm">✅</a>
+                            <a href="/admin/users/{{ u.id }}/reject" class="btn btn-danger btn-sm">❌</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="padding:2rem; text-align:center; color:var(--muted); font-size:0.85rem;">
+            ✅ Barcha so'rovlar ko'rib chiqilgan
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

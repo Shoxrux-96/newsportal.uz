@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel — XabarUz{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0d0d0d; --paper: #f5f0e8; --accent: #c8392b; --accent2: #1a3a5c;
+            --muted: #6b6560; --border: #d4cfc7; --sidebar-w: 240px;
+            --sidebar-bg: #0d1117; --sidebar-hover: rgba(255,255,255,0.06);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: #f0ece4; min-height: 100vh; display: flex; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-w); background: var(--sidebar-bg);
+            position: fixed; top: 0; left: 0; bottom: 0;
+            display: flex; flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+        .sidebar-logo {
+            padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-logo a {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem; font-weight: 900;
+            color: white; text-decoration: none;
+        }
+        .sidebar-logo a span { color: var(--accent); }
+        .sidebar-logo p { font-size: 0.68rem; color: #555; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+        .nav-section { padding: 0.5rem 1rem 0.25rem; font-size: 0.62rem; color: #444; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+        .sidebar-link {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.65rem 1.25rem; color: #888;
+            text-decoration: none; font-size: 0.85rem;
+            transition: all 0.15s; border-left: 3px solid transparent;
+        }
+        .sidebar-link:hover { background: var(--sidebar-hover); color: #ccc; }
+        .sidebar-link.active { background: var(--sidebar-hover); color: white; border-left-color: var(--accent); }
+        .sidebar-link .icon { width: 16px; text-align: center; }
+        
+        .sidebar-footer {
+            padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .admin-info { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .admin-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--accent); display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; color: white; flex-shrink: 0;
+        }
+        .admin-name { font-size: 0.82rem; font-weight: 600; color: white; }
+        .admin-role { font-size: 0.68rem; color: #555; }
+        .sidebar-footer a { display: block; font-size: 0.78rem; color: #666; text-decoration: none; padding: 0.35rem 0; transition: color 0.15s; }
+        .sidebar-footer a:hover { color: var(--accent); }
+
+        /* MAIN */
+        .admin-main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+        .admin-topbar {
+            background: white; border-bottom: 1px solid var(--border);
+            padding: 0 2rem; height: 56px;
+            display: flex; align-items: center; gap: 1rem;
+            position: sticky; top: 0; z-index: 10;
+        }
+        .topbar-title { font-weight: 700; font-size: 0.95rem; }
+        .topbar-right { margin-left: auto; display: flex; gap: 0.75rem; align-items: center; }
+        .admin-content { padding: 2rem; flex: 1; }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
+        .stat-card {
+            background: white; border: 1px solid var(--border);
+            border-radius: 4px; padding: 1.25rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .stat-icon {
+            width: 44px; height: 44px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+        }
+        .stat-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; line-height: 1; }
+        .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+
+        /* TABLE */
+        .admin-table-wrap { background: white; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+        .admin-table-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .admin-table-header h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #fafafa; padding: 0.65rem 1rem; text-align: left; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); }
+        td { padding: 0.8rem 1rem; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+
+        /* FORM */
+        .admin-form { background: white; border: 1px solid var(--border); border-radius: 4px; padding: 2rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 0.5rem; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border);
+            border-radius: 3px; font-size: 0.9rem; font-family: 'IBM Plex Sans', sans-serif;
+            outline: none; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent2); }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+
+        /* BTNS */
+        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.2rem; border-radius: 3px; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; cursor: pointer; text-decoration: none; border: none; transition: all 0.2s; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: #a52e22; }
+        .btn-secondary { background: var(--accent2); color: white; }
+        .btn-secondary:hover { background: #122a43; }
+        .btn-success { background: #198754; color: white; }
+        .btn-success:hover { background: #146c43; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #bb2d3b; }
+        .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+        .btn-outline:hover { background: var(--ink); color: white; }
+        .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.72rem; }
+
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 2px; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-approved { background: #d1e7dd; color: #0f5132; }
+        .badge-rejected { background: #f8d7da; color: #842029; }
+        .badge-admin { background: var(--accent); color: white; }
+        .badge-user { background: var(--accent2); color: white; }
+
+        @media(max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <a href="/admin">Xabar<span>Uz</span></a>
+            <p>Admin Panel</p>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section">Asosiy</div>
+            <a href="/admin" class="sidebar-link {{ 'active' if request.url.path == '/admin' }}">
+                <span class="icon">📊</span> Dashboard
+            </a>
+            <div class="nav-section">Kontent</div>
+            <a href="/admin/news" class="sidebar-link {{ 'active' if '/admin/news' in request.url.path and 'create' not in request.url.path }}">
+                <span class="icon">📰</span> Yangiliklar
+            </a>
+            <a href="/admin/news/create" class="sidebar-link {{ 'active' if 'create' in request.url.path }}">
+                <span class="icon">✏️</span> Yangilik Qo'shish
+            </a>
+            <div class="nav-section">Foydalanuvchilar</div>
+            <a href="/admin/users" class="sidebar-link {{ 'active' if '/admin/users' in request.url.path }}">
+                <span class="icon">👥</span> Foydalanuvchilar
+            </a>
+            <div class="nav-section">Sayt</div>
+            <a href="/" class="sidebar-link">
+                <span class="icon">🏠</span> Saytga O'tish
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="admin-info">
+                <div class="admin-avatar">{{ current_user.full_name[0] if current_user else 'A' }}</div>
+                <div>
+                    <div class="admin-name">{{ current_user.full_name if current_user else 'Admin' }}</div>
+                    <div class="admin-role">Super Admin</div>
+                </div>
+            </div>
+            <a href="/logout">🚪 Chiqish</a>
+        </div>
+    </nav>
+
+    <div class="admin-main">
+        <div class="admin-topbar">
+            <span class="topbar-title">{% block page_title %}Dashboard{% endblock %}</span>
+            <div class="topbar-right">
+                <a href="/admin/news/create" class="btn btn-primary btn-sm">+ Yangilik</a>
+            </div>
+        </div>
+        <div class="admin-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

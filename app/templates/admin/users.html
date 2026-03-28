@@ -1,0 +1,89 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Foydalanuvchilar — Admin{% endblock %}
+{% block page_title %}Foydalanuvchilar Boshqaruvi{% endblock %}
+
+{% block content %}
+<div class="admin-table-wrap">
+    <div class="admin-table-header">
+        <h3>Barcha Foydalanuvchilar ({{ users|length }})</h3>
+        <div style="display:flex; gap:0.75rem; align-items:center;">
+            {% set pending = users | selectattr('status', 'equalto', 'pending') | list %}
+            {% if pending %}
+            <span style="background:#fff3cd; color:#856404; padding:0.25rem 0.75rem; border-radius:2px; font-size:0.75rem; font-weight:600;">
+                ⏳ {{ pending|length }} ta kutayotgan
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    {% if users %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Foydalanuvchi</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Holat</th>
+                <th>Sana</th>
+                <th>Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr style="{{ 'background:#fffbf0;' if u.status == 'pending' }}">
+                <td style="color:var(--muted); font-size:0.75rem;">{{ loop.index }}</td>
+                <td>
+                    <div style="font-weight:600; font-size:0.88rem;">{{ u.full_name }}</div>
+                </td>
+                <td style="font-size:0.82rem; color:var(--muted);">{{ u.email }}</td>
+                <td>
+                    {% if u.role == 'admin' %}
+                    <span class="badge badge-admin">Admin</span>
+                    {% else %}
+                    <span class="badge badge-user">User</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u.status == 'pending' %}
+                    <span class="badge badge-pending">⏳ Kutmoqda</span>
+                    {% elif u.status == 'approved' %}
+                    <span class="badge badge-approved">✅ Tasdiqlangan</span>
+                    {% else %}
+                    <span class="badge badge-rejected">❌ Rad etilgan</span>
+                    {% endif %}
+                </td>
+                <td style="font-size:0.78rem; color:var(--muted);">{{ u.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>
+                    <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                        {% if u.status == 'pending' %}
+                        <a href="/admin/users/{{ u.id }}/approve" class="btn btn-success btn-sm">✅ Tasdiqlash</a>
+                        <a href="/admin/users/{{ u.id }}/reject" class="btn btn-danger btn-sm">❌ Rad</a>
+                        {% elif u.status == 'approved' and u.role != 'admin' %}
+                        <a href="/admin/users/{{ u.id }}/make-admin" class="btn btn-secondary btn-sm" onclick="return confirm('Adminlikka ko\'tarishni tasdiqlaysizmi?')">⭐ Admin qilish</a>
+                        <a href="/admin/users/{{ u.id }}/reject" class="btn btn-danger btn-sm">🚫 Bloklash</a>
+                        {% elif u.status == 'rejected' %}
+                        <a href="/admin/users/{{ u.id }}/approve" class="btn btn-success btn-sm">🔓 Qayta ochish</a>
+                        {% else %}
+                        <span style="color:var(--muted); font-size:0.75rem;">— Super Admin</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding:3rem; text-align:center; color:var(--muted);">
+        <div style="font-size:3rem; margin-bottom:1rem;">👥</div>
+        <p>Hali foydalanuvchilar yo'q</p>
+    </div>
+    {% endif %}
+</div>
+
+<div style="margin-top:1.5rem; padding:1.25rem; background:white; border:1px solid var(--border); border-radius:4px; font-size:0.82rem; color:var(--muted); line-height:1.7;">
+    <strong style="color:var(--ink);">Qo'llanma:</strong><br>
+    • <strong>Tasdiqlash</strong> — foydalanuvchi tizimga kirishi mumkin bo'ladi<br>
+    • <strong>Rad etish</strong> — foydalanuvchi tizimga kira olmaydi<br>
+    • <strong>Admin qilish</strong> — foydalanuvchiga admin huquqlari beriladi va yangilik qo'sha oladi
+</div>
+{% endblock %}

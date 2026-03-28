@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect width="800" height="450" fill="#1a1a2e"/>
+  <rect x="0" y="0" width="800" height="4" fill="#c8392b"/>
+  <text x="400" y="210" font-family="Georgia, serif" font-size="72" fill="rgba(255,255,255,0.08)" text-anchor="middle" font-weight="bold">XabarUz</text>
+  <text x="400" y="255" font-family="Georgia, serif" font-size="24" fill="rgba(255,255,255,0.3)" text-anchor="middle">📰</text>
+  <text x="400" y="295" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.2)" text-anchor="middle">Yangilik rasmi yuklanmagan</text>
+</svg>

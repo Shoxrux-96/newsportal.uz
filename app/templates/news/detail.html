@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}{{ news.title }} — XabarUz{% endblock %}
+
+{% block extra_css %}
+<style>
+.article-layout { display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem; }
+.article { background: var(--card-bg); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+.article-hero { position: relative; }
+.article-hero img { width: 100%; height: 400px; object-fit: cover; display: block; }
+.article-hero-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    padding: 2rem 1.5rem 1.5rem;
+}
+.article-body { padding: 2rem; }
+.article-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.1rem; font-weight: 900; line-height: 1.25;
+    margin: 1rem 0;
+}
+.article-meta {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    padding: 1rem 0; border-bottom: 2px solid var(--border);
+    margin-bottom: 1.5rem; color: var(--muted); font-size: 0.85rem;
+}
+.article-meta strong { color: var(--ink); }
+.article-content {
+    font-size: 1rem; line-height: 1.85;
+    color: #2a2a2a;
+}
+.article-content p { margin-bottom: 1.2rem; }
+
+.sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+.sidebar-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+.sidebar-card-header {
+    background: var(--ink); color: white;
+    padding: 0.75rem 1rem;
+    font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.95rem;
+}
+.related-item {
+    display: flex; gap: 0.75rem;
+    padding: 0.85rem 1rem; border-bottom: 1px solid var(--border);
+    text-decoration: none; color: inherit;
+    transition: background 0.2s;
+}
+.related-item:hover { background: var(--paper); }
+.related-item:last-child { border-bottom: none; }
+.related-item img { width: 70px; height: 55px; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
+.related-item h4 { font-size: 0.82rem; font-weight: 600; line-height: 1.4; }
+.related-item p { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+
+.share-bar {
+    display: flex; gap: 0.75rem; flex-wrap: wrap;
+    padding: 1.25rem; border-top: 1px solid var(--border);
+    margin-top: 1.5rem;
+}
+.share-btn {
+    padding: 0.5rem 1.2rem; border-radius: 2px;
+    font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    border: none; display: inline-block;
+}
+.share-tg { background: #2CA5E0; color: white; }
+.share-tw { background: #1DA1F2; color: white; }
+.share-copy { background: var(--border); color: var(--ink); }
+
+@media(max-width: 900px) {
+    .article-layout { grid-template-columns: 1fr; }
+    .article-title { font-size: 1.5rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.5rem;">
+    <a href="/news" style="color:var(--muted); text-decoration:none; font-size:0.85rem;">← Yangiliklarga qaytish</a>
+</div>
+
+<div class="article-layout">
+    <!-- ARTICLE -->
+    <article class="article">
+        <div class="article-hero">
+            <img src="{{ news.image_url }}" alt="{{ news.title }}" onerror="this.src='https://picsum.photos/900/400?random=99'">
+        </div>
+        <div class="article-body">
+            <a href="/news?category={{ news.category }}" class="card-category">{{ news.category }}</a>
+            <h1 class="article-title">{{ news.title }}</h1>
+            <div class="article-meta">
+                <span>✍️ <strong>{{ author.full_name }}</strong></span>
+                <span>📅 {{ news.created_at.strftime('%d %B %Y, %H:%M') }}</span>
+                <span>👁 {{ news.views }} ko'rishlar</span>
+            </div>
+            {% if news.summary %}
+            <p style="font-size:1.05rem; color:var(--muted); font-style:italic; border-left:3px solid var(--accent); padding-left:1rem; margin-bottom:1.5rem;">{{ news.summary }}</p>
+            {% endif %}
+            <div class="article-content">
+                {% for paragraph in news.content.split('\n') %}
+                    {% if paragraph.strip() %}<p>{{ paragraph }}</p>{% endif %}
+                {% endfor %}
+            </div>
+            <div class="share-bar">
+                <span style="font-size:0.8rem; font-weight:600; color:var(--muted); align-self:center;">Ulashish:</span>
+                <a href="https://t.me/share/url?url={{ request.url }}&text={{ news.title }}" target="_blank" class="share-btn share-tg">✈️ Telegram</a>
+                <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ news.title }}" target="_blank" class="share-btn share-tw">🐦 Twitter</a>
+                <button onclick="navigator.clipboard.writeText(window.location.href); this.textContent='✅ Nusxalandi'" class="share-btn share-copy">🔗 Nusxalash</button>
+            </div>
+        </div>
+    </article>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        {% if related %}
+        <div class="sidebar-card">
+            <div class="sidebar-card-header">📌 O'xshash Yangiliklar</div>
+            {% for r in related %}
+            <a href="/news/{{ r.slug }}" class="related-item">
+                <img src="{{ r.image_url }}" alt="{{ r.title }}" onerror="this.src='https://picsum.photos/150/100?random={{ loop.index + 50 }}'">
+                <div>
+                    <h4>{{ r.title[:65] }}{% if r.title|length > 65 %}...{% endif %}</h4>
+                    <p>{{ r.created_at.strftime('%d.%m.%Y') }} • {{ r.views }} ko'rish</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="sidebar-card">
+            <div class="sidebar-card-header">📊 Maqola Ma'lumotlari</div>
+            <div style="padding:1rem; display:flex; flex-direction:column; gap:0.75rem;">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                    <span style="color:var(--muted);">Kategoriya</span>
+                    <a href="/news?category={{ news.category }}" class="card-category" style="font-size:0.65rem;">{{ news.category }}</a>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                    <span style="color:var(--muted);">Muallif</span>
+                    <strong>{{ author.full_name }}</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                    <span style="color:var(--muted);">Ko'rishlar</span>
+                    <strong>{{ news.views }}</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                    <span style="color:var(--muted);">Sana</span>
+                    <strong>{{ news.created_at.strftime('%d.%m.%Y') }}</strong>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}
